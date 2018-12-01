@@ -1,3 +1,5 @@
+const swap = require('./swap');
+
 /**
  * @param {[]} array
  *  List to sort
