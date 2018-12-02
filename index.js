@@ -1,15 +1,18 @@
 const swap = require('./utils/swap');
 
-const quickSortLoop = (array, low, high, comparator) => {
-  if (high - low <= 0) return;
+const dualPivotQuickSortLoop = (array, low, high, comparator) => {
+  if (high <= low) return;
   if (array[low] > array[high]) {
     swap(array, low, high);
   }
+  // TODO: Implement better pivot choices
   const lowPivot = array[low];
   const highPivot = array[high];
   // The future position of lowPivot after this iteration
+  // will be 1 behind this.
   let newLowPosition = low + 1;
   // The future position of highPivot after this iteration
+  // will be 1 ahead of this.
   let newHighPosition = high - 1;
   // Scans the list
   let cursor = newLowPosition;
@@ -21,15 +24,14 @@ const quickSortLoop = (array, low, high, comparator) => {
       newLowPosition += 1;
     } else if (array[cursor] >= highPivot) {
       while (array[newHighPosition] > highPivot && cursor < newHighPosition) {
-        // Move the new highPosition until we see an element it is
-        // bigger than.
+        // Move newHighPosition backwards as far as possible.
         newHighPosition -= 1;
       }
       swap(array, cursor, newHighPosition);
       newHighPosition -= 1;
+      // Check if swapped element should be in the
+      // partition behind lowPivot
       if (array[cursor] < lowPivot) {
-        // Move cursor to the partition behind lowPivot,
-        // while maintaining the structure ahead of lowPivot
         swap(array, cursor, newLowPosition);
         newLowPosition += 1;
       }
@@ -40,14 +42,15 @@ const quickSortLoop = (array, low, high, comparator) => {
   newHighPosition += 1;
   swap(array, low, newLowPosition);
   swap(array, high, newHighPosition);
-  quickSortLoop(array, low, newLowPosition - 1, comparator);
-  quickSortLoop(array, newLowPosition + 1, newHighPosition - 1, comparator);
-  quickSortLoop(array, newHighPosition, high, comparator);
+  dualPivotQuickSortLoop(array, low, newLowPosition - 1, comparator);
+  dualPivotQuickSortLoop(array, newLowPosition + 1, newHighPosition - 1, comparator);
+  dualPivotQuickSortLoop(array, newHighPosition, high, comparator);
 };
 
 /**
  * A variation of quickSort, invented by Vladimir Yaroslavskiy,
- * that uses two pivots instead of one.
+ * that uses two pivots instead of one. For a visualization,
+ * see https://learnforeverlearn.com/yaro_web/
  *
  * @param {[]} array
  *  List to sort
@@ -57,13 +60,8 @@ const quickSortLoop = (array, low, high, comparator) => {
  *  a.valueOf() and b.valueOf().
  *
  */
-const quickSort = (array, comparator = (a, b) => a.valueOf() <= b.valueOf()) => {
-  // TODO: Implement better pivot choices
-  quickSortLoop(array, 0, array.length - 1, comparator);
+const dualPivotQuickSort = (array, comparator = (a, b) => a.valueOf() <= b.valueOf()) => {
+  dualPivotQuickSortLoop(array, 0, array.length - 1, comparator);
 };
 
-quickSort(array);
-
-console.log(array);
-
-module.exports = quickSort;
+module.exports = dualPivotQuickSort;

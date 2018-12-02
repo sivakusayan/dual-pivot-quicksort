@@ -7,12 +7,14 @@
   "author": "Sayan Sivakumaran <sivakusayan@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "jest"
+    "test": "jest", 
+    "benchmark": "node benchmarks/benchmark.js"
   },
   "devDependencies": {
     "eslint": "^5.9.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
-    "jest": "^23.6.0"
+    "jest": "^23.6.0",
+    "timsort": "^0.3.0"
   }
 }
