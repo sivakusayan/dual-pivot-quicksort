@@ -10,87 +10,11 @@
  * measurements.
  */
 
-const { performance } = require('perf_hooks');
 const TimSort = require('timsort');
-const dualPivotQuickSort = require('../index');
 
-/**
- * Sets up the tests for benchmarking.
- *
- * @param {'random' | 'ascending' | 'descending'} mode
- *  Determines how we populate the tests.
- * @param {Number} testCount
- *  The amount of tests to run for each function
- * @param {Number} testSize
- *  The size of the array each function will sort
- */
-const populateTests = (mode, testCount, testSize) => {
-  const tests = [];
-  for (let i = 0; i < testCount; i += 1) {
-    tests[i] = [];
-    for (let j = 0; j < testSize; j += 1) {
-      if (mode === 'random') {
-        tests[i].push(Math.floor(Math.random() * 9007199254740992));
-      } else if (mode === 'ascending') {
-        tests[i].push(j);
-      } else if (mode === 'descending') {
-        tests[i].push(-j);
-      } else if (mode === 'manyEqual') {
-        // Works by the pigeonhole principle. In short, filling a large
-        // amount of spaces with a range of numbers that is much smaller
-        // gives a high chance of repeating values.
-        tests[i].push(Math.floor(Math.random() * Math.cbrt(testSize)));
-      }
-    }
-  }
-  return tests;
-};
-
-/**
- * @param fn
- *  The sorting function to measure
- * @param testList
- *  The tests to give to fn
- * @param isNative
- *  True if we are testing Array.prototype.sort(), and false
- *  otherwise. We do this because the native sort gets the
- *  array from a this binding rather than by argument. We
- *  could have wrapped the native sort inside a function,
- *  but function calls would corrupt the data.
- */
-const measurePerformance = (fn, testList, isNative) => {
-  const timeResults = [];
-  const heapUsedResults = [];
-  for (let i = 0; i < testList.length; i += 1) {
-    // Different branch for Array.prototype.sort()
-    // due to differing API.
-    if (isNative) {
-      const { heapUsed } = process.memoryUsage();
-      const curr = performance.now();
-
-      testList[i].sort();
-
-      timeResults.push(performance.now() - curr);
-      heapUsedResults.push(process.memoryUsage().heapUsed - heapUsed);
-    } else {
-      const { heapUsed } = process.memoryUsage();
-      const curr = performance.now();
-
-      fn(testList[i]);
-
-      timeResults.push(performance.now() - curr);
-      heapUsedResults.push(process.memoryUsage().heapUsed - heapUsed);
-    }
-  }
-  timeResults.sort();
-  heapUsedResults.sort();
-  // Return the median instead of the average to account for
-  // warm up results which could skew the average.
-  return {
-    'Time Spent (ns)': Math.round(timeResults[Math.floor(timeResults.length / 2)] * 1000000),
-    'Heap Used (mb)': heapUsedResults[Math.floor(timeResults.length / 2)],
-  };
-};
+const QuickSort = require('../dist/index');
+const populateTests = require('./utils/populateTests');
+const measurePerformance = require('./utils/measurePerformance');
 
 const run = (testCount, testSize) => {
   console.log('Initializing tests...');
@@ -102,7 +26,7 @@ const run = (testCount, testSize) => {
 
   const suite = {
     'Tim Sort': TimSort.sort,
-    'Dual-Pivot Quick Sort': dualPivotQuickSort,
+    'Dual-Pivot Quick Sort': QuickSort.sort,
     'Native Sort': Array.prototype.sort,
   };
 
@@ -128,7 +52,7 @@ const run = (testCount, testSize) => {
     const resDescending = measurePerformance(suite[name], testsDescendingCopy, isNative);
     console.log(`Running tests for ${name} with many-equal arrays...`);
     const resManyEqual = measurePerformance(suite[name], testsManyEqualCopy, isNative);
-    console.log('Done!');
+    console.log('\x1b[32m%s\x1b[0m', 'Done!');
 
     resultsRandom[name] = resRandom;
     resultsAscending[name] = resAscending;
@@ -146,4 +70,4 @@ const run = (testCount, testSize) => {
   console.table(resultsManyEqual);
 };
 
-run(100, 10000);
+run(1000, 1000);

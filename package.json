@@ -7,14 +7,16 @@
   "author": "Sayan Sivakumaran <sivakusayan@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "jest", 
-    "benchmark": "node benchmarks/benchmark.js"
+    "test": "jest",
+    "benchmark": "node benchmarks/benchmark.js",
+    "compile": "parcel build src/index.js --out-file dist/index.js --no-source-maps"
   },
   "devDependencies": {
     "eslint": "^5.9.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
     "jest": "^23.6.0",
+    "parcel-bundler": "^1.10.3",
     "timsort": "^0.3.0"
   }
 }

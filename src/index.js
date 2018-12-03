@@ -5,6 +5,14 @@ const dualPivotQuickSortLoop = (array, low, high, comparator) => {
   if (array[low] > array[high]) {
     swap(array, low, high);
   }
+
+  // Picking pivots as done by the quick sort implementation in
+  // Java SDK. See line 279:
+  // http://hg.openjdk.java.net/jdk8/jdk8/jdk/file/tip/src/share/classes/java/util/DualPivotQuicksort.java
+
+  // Approximation by bitwise operators is cheaper than division.
+  const seventh = (array.length >> 3) + (array.length >> 6) + 1;
+
   // TODO: Implement better pivot choices
   const lowPivot = array[low];
   const highPivot = array[high];
@@ -60,8 +68,19 @@ const dualPivotQuickSortLoop = (array, low, high, comparator) => {
  *  a.valueOf() and b.valueOf().
  *
  */
-const dualPivotQuickSort = (array, comparator = (a, b) => a.valueOf() <= b.valueOf()) => {
+const dualPivotQuickSort = (array, comparator = a => a.valueOf()) => {
   dualPivotQuickSortLoop(array, 0, array.length - 1, comparator);
+  // Idea to get past compiler not inlining function: use lifting maps!
+  // Given a valueOf function, project the array down into their values, and
+  // call sort on the projection. Let the sort on the projection determine how 
+  // we sort the array above.
+  // Be sure to combine function calls in the swaps.
+  // const projection = [];
+  // for (let i = 0; i < array.length; i += 1) {
+  //   projection.push(comparator(array[i]));
+  // }
 };
 
-module.exports = dualPivotQuickSort;
+module.exports = {
+  sort: dualPivotQuickSort,
+};
